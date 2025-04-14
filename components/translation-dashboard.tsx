@@ -1,16 +1,30 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useSupabase } from "@/lib/supabase-provider"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/hooks/use-toast"
-import { Copy, Check, RotateCcw, LogOut, History, Settings, Globe } from "lucide-react"
-import type { User } from "@supabase/supabase-js"
-import { MCPStatus } from "./mcp-status"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSupabase } from "@/lib/supabase-provider";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Copy,
+  Check,
+  RotateCcw,
+  LogOut,
+  History,
+  Settings,
+  Globe,
+} from "lucide-react";
+import type { User } from "@supabase/supabase-js";
+import { MCPStatus } from "./mcp-status";
 
 // Supported languages with ligatures
 const LANGUAGES = [
@@ -27,29 +41,36 @@ const LANGUAGES = [
   { code: "de", name: "German" },
   { code: "es", name: "Spanish" },
   { code: "ru", name: "Russian" },
-]
+];
 
 interface TranslationDashboardProps {
-  user: User
-  profile: any
+  user: User;
+  profile: any;
 }
 
-export default function TranslationDashboard({ user, profile }: TranslationDashboardProps) {
-  const router = useRouter()
-  const { supabase } = useSupabase()
-  const { toast } = useToast()
+export default function TranslationDashboard({
+  user,
+  profile,
+}: TranslationDashboardProps) {
+  const router = useRouter();
+  const { supabase } = useSupabase();
+  const { toast } = useToast();
 
-  const [sourceText, setSourceText] = useState("")
-  const [translatedText, setTranslatedText] = useState("")
-  const [sourceLang, setSourceLang] = useState(profile?.preferred_source_language || "en")
-  const [targetLang, setTargetLang] = useState(profile?.preferred_target_language || "ar")
-  const [isTranslating, setIsTranslating] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const [sourceText, setSourceText] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
+  const [sourceLang, setSourceLang] = useState(
+    profile?.preferred_source_language || "en"
+  );
+  const [targetLang, setTargetLang] = useState(
+    profile?.preferred_target_language || "ar"
+  );
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const handleTranslate = async () => {
-    if (!sourceText.trim()) return
+    if (!sourceText.trim()) return;
 
-    setIsTranslating(true)
+    setIsTranslating(true);
 
     try {
       const response = await fetch("/api/translate", {
@@ -62,55 +83,58 @@ export default function TranslationDashboard({ user, profile }: TranslationDashb
           sourceLang,
           targetLang,
         }),
-      })
+      });
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Translation failed")
+        throw new Error(data.error || "Translation failed");
       }
 
-      setTranslatedText(data.translatedText)
+      setTranslatedText(data.translatedText);
 
       // Update user preferences if they've changed
-      if (sourceLang !== profile?.preferred_source_language || targetLang !== profile?.preferred_target_language) {
+      if (
+        sourceLang !== profile?.preferred_source_language ||
+        targetLang !== profile?.preferred_target_language
+      ) {
         await supabase
           .from("user_profiles")
           .update({
             preferred_source_language: sourceLang,
             preferred_target_language: targetLang,
           })
-          .eq("id", user.id)
+          .eq("id", user.id);
       }
     } catch (error: any) {
       toast({
         title: "Translation failed",
         description: error.message || "Please try again later",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsTranslating(false)
+      setIsTranslating(false);
     }
-  }
+  };
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(translatedText)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
+    navigator.clipboard.writeText(translatedText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const handleSwapLanguages = () => {
-    setSourceLang(targetLang)
-    setTargetLang(sourceLang)
-    setSourceText(translatedText)
-    setTranslatedText(sourceText)
-  }
+    setSourceLang(targetLang);
+    setTargetLang(sourceLang);
+    setSourceText(translatedText);
+    setTranslatedText(sourceText);
+  };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
-  }
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -121,13 +145,13 @@ export default function TranslationDashboard({ user, profile }: TranslationDashb
             <span className="text-xl font-bold">Ligature Translator</span>
           </div>
           <nav className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => router.push("/history")}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => router.push("/history")}
+            >
               <History className="h-5 w-5" />
               <span className="sr-only">History</span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => router.push("/settings")}>
-              <Settings className="h-5 w-5" />
-              <span className="sr-only">Settings</span>
             </Button>
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="h-5 w-5" />
@@ -137,7 +161,7 @@ export default function TranslationDashboard({ user, profile }: TranslationDashb
         </div>
       </header>
 
-      <main className="container flex-1 py-6">
+      <main className="container flex-1 py-6 grid justify-center">
         <Card>
           <CardContent className="p-6">
             <div className="grid gap-6">
@@ -156,7 +180,11 @@ export default function TranslationDashboard({ user, profile }: TranslationDashb
                     </SelectContent>
                   </Select>
                 </div>
-                <Button variant="outline" size="icon" onClick={handleSwapLanguages}>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleSwapLanguages}
+                >
                   <RotateCcw className="h-4 w-4" />
                   <span className="sr-only">Swap languages</span>
                 </Button>
@@ -194,8 +222,17 @@ export default function TranslationDashboard({ user, profile }: TranslationDashb
                       readOnly
                     />
                     {translatedText && (
-                      <Button variant="ghost" size="icon" className="absolute right-2 top-2" onClick={handleCopy}>
-                        {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-2 top-2"
+                        onClick={handleCopy}
+                      >
+                        {copied ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
                         <span className="sr-only">Copy to clipboard</span>
                       </Button>
                     )}
@@ -203,7 +240,11 @@ export default function TranslationDashboard({ user, profile }: TranslationDashb
                 </div>
               </div>
 
-              <Button onClick={handleTranslate} disabled={isTranslating || !sourceText.trim()} className="w-full">
+              <Button
+                onClick={handleTranslate}
+                disabled={isTranslating || !sourceText.trim()}
+                className="w-full"
+              >
                 {isTranslating ? "Translating..." : "Translate"}
               </Button>
             </div>
@@ -215,5 +256,5 @@ export default function TranslationDashboard({ user, profile }: TranslationDashb
         </div>
       </main>
     </div>
-  )
+  );
 }

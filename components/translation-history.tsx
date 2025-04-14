@@ -1,115 +1,137 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { useSupabase } from "@/lib/supabase-provider"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { useToast } from "@/hooks/use-toast"
-import { Globe, LogOut, Settings, Star, Trash2, Copy, Check } from "lucide-react"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useSupabase } from "@/lib/supabase-provider";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Globe,
+  LogOut,
+  Settings,
+  Star,
+  Trash2,
+  Copy,
+  Check,
+} from "lucide-react";
 
 interface Translation {
-  id: string
-  source_text: string
-  translated_text: string
-  source_language: string
-  target_language: string
-  is_favorite: boolean
-  created_at: string
+  id: string;
+  source_text: string;
+  translated_text: string;
+  source_language: string;
+  target_language: string;
+  is_favorite: boolean;
+  created_at: string;
 }
 
 interface TranslationHistoryProps {
-  translations: Translation[]
+  translations: Translation[];
 }
 
-export default function TranslationHistory({ translations }: TranslationHistoryProps) {
-  const router = useRouter()
-  const { supabase } = useSupabase()
-  const { toast } = useToast()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [copied, setCopied] = useState<string | null>(null)
+export default function TranslationHistory({
+  translations,
+}: TranslationHistoryProps) {
+  const router = useRouter();
+  const { supabase } = useSupabase();
+  const { toast } = useToast();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
 
   // Filter translations based on search term
   const filteredTranslations = translations.filter((translation) => {
-    const searchLower = searchTerm.toLowerCase()
+    const searchLower = searchTerm.toLowerCase();
     return (
       translation.source_text.toLowerCase().includes(searchLower) ||
       translation.translated_text.toLowerCase().includes(searchLower)
-    )
-  })
+    );
+  });
 
   // Group by favorites and all
-  const favorites = filteredTranslations.filter((t) => t.is_favorite)
+  const favorites = filteredTranslations.filter((t) => t.is_favorite);
 
   const handleToggleFavorite = async (id: string, currentStatus: boolean) => {
     try {
-      const { error } = await supabase.from("translations").update({ is_favorite: !currentStatus }).eq("id", id)
+      const { error } = await supabase
+        .from("translations")
+        .update({ is_favorite: !currentStatus })
+        .eq("id", id);
 
-      if (error) throw error
+      if (error) throw error;
 
       // Update local state
-      router.refresh()
+      router.refresh();
 
       toast({
         title: currentStatus ? "Removed from favorites" : "Added to favorites",
         description: "Your translation history has been updated",
-      })
+      });
     } catch (error: any) {
       toast({
         title: "Action failed",
         description: error.message || "Please try again later",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleDelete = async (id: string) => {
     try {
-      const { error } = await supabase.from("translations").delete().eq("id", id)
+      const { error } = await supabase
+        .from("translations")
+        .delete()
+        .eq("id", id);
 
-      if (error) throw error
+      if (error) throw error;
 
       // Update local state
-      router.refresh()
+      router.refresh();
 
       toast({
         title: "Translation deleted",
         description: "The translation has been removed from your history",
-      })
+      });
     } catch (error: any) {
       toast({
         title: "Delete failed",
         description: error.message || "Please try again later",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleCopy = (text: string, id: string) => {
-    navigator.clipboard.writeText(text)
-    setCopied(id)
-    setTimeout(() => setCopied(null), 2000)
-  }
+    navigator.clipboard.writeText(text);
+    setCopied(id);
+    setTimeout(() => setCopied(null), 2000);
+  };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    router.push("/")
-    router.refresh()
-  }
+    await supabase.auth.signOut();
+    router.push("/");
+    router.refresh();
+  };
 
   // Format date for display
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
+    const date = new Date(dateString);
     return new Intl.DateTimeFormat("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }).format(date)
-  }
+    }).format(date);
+  };
 
   // Get language name from code
   const getLanguageName = (code: string) => {
@@ -127,9 +149,9 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
       de: "German",
       es: "Spanish",
       ru: "Russian",
-    }
-    return languages[code] || code
-  }
+    };
+    return languages[code] || code;
+  };
 
   return (
     <div className="flex min-h-screen flex-col">
@@ -143,10 +165,6 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
             <Button variant="ghost" onClick={() => router.push("/dashboard")}>
               Translator
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => router.push("/settings")}>
-              <Settings className="h-5 w-5" />
-              <span className="sr-only">Settings</span>
-            </Button>
             <Button variant="ghost" size="icon" onClick={handleSignOut}>
               <LogOut className="h-5 w-5" />
               <span className="sr-only">Sign out</span>
@@ -159,7 +177,9 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
         <Card>
           <CardHeader>
             <CardTitle>Translation History</CardTitle>
-            <CardDescription>View and manage your past translations</CardDescription>
+            <CardDescription>
+              View and manage your past translations
+            </CardDescription>
             <div className="mt-4">
               <Input
                 placeholder="Search translations..."
@@ -178,7 +198,9 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
               <TabsContent value="all">
                 {filteredTranslations.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    {searchTerm ? "No translations match your search" : "No translations yet"}
+                    {searchTerm
+                      ? "No translations match your search"
+                      : "No translations yet"}
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -194,16 +216,31 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleToggleFavorite(translation.id, translation.is_favorite)}
+                                onClick={() =>
+                                  handleToggleFavorite(
+                                    translation.id,
+                                    translation.is_favorite
+                                  )
+                                }
                               >
                                 <Star
-                                  className={`h-4 w-4 ${translation.is_favorite ? "fill-yellow-400 text-yellow-400" : ""}`}
+                                  className={`h-4 w-4 ${
+                                    translation.is_favorite
+                                      ? "fill-yellow-400 text-yellow-400"
+                                      : ""
+                                  }`}
                                 />
                                 <span className="sr-only">
-                                  {translation.is_favorite ? "Remove from favorites" : "Add to favorites"}
+                                  {translation.is_favorite
+                                    ? "Remove from favorites"
+                                    : "Add to favorites"}
                                 </span>
                               </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDelete(translation.id)}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(translation.id)}
+                              >
                                 <Trash2 className="h-4 w-4" />
                                 <span className="sr-only">Delete</span>
                               </Button>
@@ -212,13 +249,20 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
 
                           <div className="grid gap-4 md:grid-cols-2">
                             <div className="relative p-3 border rounded-md">
-                              <div className="text-sm font-medium mb-1">Source</div>
+                              <div className="text-sm font-medium mb-1">
+                                Source
+                              </div>
                               <p>{translation.source_text}</p>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="absolute right-2 top-2"
-                                onClick={() => handleCopy(translation.source_text, `source-${translation.id}`)}
+                                onClick={() =>
+                                  handleCopy(
+                                    translation.source_text,
+                                    `source-${translation.id}`
+                                  )
+                                }
                               >
                                 {copied === `source-${translation.id}` ? (
                                   <Check className="h-4 w-4" />
@@ -230,25 +274,36 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
                             </div>
 
                             <div className="relative p-3 border rounded-md">
-                              <div className="text-sm font-medium mb-1">Translation</div>
+                              <div className="text-sm font-medium mb-1">
+                                Translation
+                              </div>
                               <p>{translation.translated_text}</p>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="absolute right-2 top-2"
-                                onClick={() => handleCopy(translation.translated_text, `translation-${translation.id}`)}
+                                onClick={() =>
+                                  handleCopy(
+                                    translation.translated_text,
+                                    `translation-${translation.id}`
+                                  )
+                                }
                               >
                                 {copied === `translation-${translation.id}` ? (
                                   <Check className="h-4 w-4" />
                                 ) : (
                                   <Copy className="h-4 w-4" />
                                 )}
-                                <span className="sr-only">Copy translation</span>
+                                <span className="sr-only">
+                                  Copy translation
+                                </span>
                               </Button>
                             </div>
                           </div>
 
-                          <div className="mt-2 text-xs text-muted-foreground">{formatDate(translation.created_at)}</div>
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            {formatDate(translation.created_at)}
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -259,7 +314,9 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
               <TabsContent value="favorites">
                 {favorites.length === 0 ? (
                   <p className="text-center text-muted-foreground py-8">
-                    {searchTerm ? "No favorite translations match your search" : "No favorite translations yet"}
+                    {searchTerm
+                      ? "No favorite translations match your search"
+                      : "No favorite translations yet"}
                   </p>
                 ) : (
                   <div className="space-y-4">
@@ -275,12 +332,23 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => handleToggleFavorite(translation.id, translation.is_favorite)}
+                                onClick={() =>
+                                  handleToggleFavorite(
+                                    translation.id,
+                                    translation.is_favorite
+                                  )
+                                }
                               >
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                                <span className="sr-only">Remove from favorites</span>
+                                <span className="sr-only">
+                                  Remove from favorites
+                                </span>
                               </Button>
-                              <Button variant="ghost" size="icon" onClick={() => handleDelete(translation.id)}>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(translation.id)}
+                              >
                                 <Trash2 className="h-4 w-4" />
                                 <span className="sr-only">Delete</span>
                               </Button>
@@ -289,13 +357,20 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
 
                           <div className="grid gap-4 md:grid-cols-2">
                             <div className="relative p-3 border rounded-md">
-                              <div className="text-sm font-medium mb-1">Source</div>
+                              <div className="text-sm font-medium mb-1">
+                                Source
+                              </div>
                               <p>{translation.source_text}</p>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="absolute right-2 top-2"
-                                onClick={() => handleCopy(translation.source_text, `source-${translation.id}`)}
+                                onClick={() =>
+                                  handleCopy(
+                                    translation.source_text,
+                                    `source-${translation.id}`
+                                  )
+                                }
                               >
                                 {copied === `source-${translation.id}` ? (
                                   <Check className="h-4 w-4" />
@@ -307,25 +382,36 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
                             </div>
 
                             <div className="relative p-3 border rounded-md">
-                              <div className="text-sm font-medium mb-1">Translation</div>
+                              <div className="text-sm font-medium mb-1">
+                                Translation
+                              </div>
                               <p>{translation.translated_text}</p>
                               <Button
                                 variant="ghost"
                                 size="icon"
                                 className="absolute right-2 top-2"
-                                onClick={() => handleCopy(translation.translated_text, `translation-${translation.id}`)}
+                                onClick={() =>
+                                  handleCopy(
+                                    translation.translated_text,
+                                    `translation-${translation.id}`
+                                  )
+                                }
                               >
                                 {copied === `translation-${translation.id}` ? (
                                   <Check className="h-4 w-4" />
                                 ) : (
                                   <Copy className="h-4 w-4" />
                                 )}
-                                <span className="sr-only">Copy translation</span>
+                                <span className="sr-only">
+                                  Copy translation
+                                </span>
                               </Button>
                             </div>
                           </div>
 
-                          <div className="mt-2 text-xs text-muted-foreground">{formatDate(translation.created_at)}</div>
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            {formatDate(translation.created_at)}
+                          </div>
                         </CardContent>
                       </Card>
                     ))}
@@ -337,5 +423,5 @@ export default function TranslationHistory({ translations }: TranslationHistoryP
         </Card>
       </main>
     </div>
-  )
+  );
 }
