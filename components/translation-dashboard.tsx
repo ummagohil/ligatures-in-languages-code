@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSupabase } from "@/lib/supabase-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,9 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Copy, Check, RotateCcw, LogOut, Settings, Globe } from "lucide-react";
-import type { User } from "@supabase/supabase-js";
-import { MCPStatus } from "./mcp-status";
+import { Copy, Check, RotateCcw, Globe } from "lucide-react";
 
 // Supported languages with ligatures
 const LANGUAGES = [
@@ -35,10 +31,7 @@ const LANGUAGES = [
   { code: "ru", name: "Russian" },
 ];
 
-interface TranslationDashboardProps {}
-
 export default function TranslationDashboard() {
-  const router = useRouter();
   const { toast } = useToast();
 
   const [sourceText, setSourceText] = useState("");
@@ -100,14 +93,11 @@ export default function TranslationDashboard() {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="container flex h-16 items-center justify-between py-4">
-          <div className="flex items-center justify-center gap-2">
+        <div className="container flex h-16 items-center justify-center py-4">
+          <div className="flex items-center gap-2">
             <Globe className="h-6 w-6" />
             <span className="text-xl font-bold">Ligatures in Languages</span>
           </div>
-          <nav className="flex items-center gap-4">
-            {/* Removed History Button */}
-          </nav>
         </div>
       </header>
 
@@ -159,7 +149,7 @@ export default function TranslationDashboard() {
                     value={sourceText}
                     onChange={(e) => setSourceText(e.target.value)}
                     placeholder="Enter text to translate"
-                    className="min-h-[200px]"
+                    className="min-h-[200px] cursor-text"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -168,7 +158,7 @@ export default function TranslationDashboard() {
                       value={translatedText}
                       readOnly
                       placeholder="Translation will appear here"
-                      className="min-h-[200px]"
+                      className="min-h-[200px] cursor-text"
                     />
                     {translatedText && (
                       <Button
@@ -191,7 +181,7 @@ export default function TranslationDashboard() {
               <Button
                 onClick={handleTranslate}
                 disabled={isTranslating}
-                className="w-full"
+                className="w-full hover:cursor-pointer"
               >
                 {isTranslating ? "Translating..." : "Translate"}
               </Button>

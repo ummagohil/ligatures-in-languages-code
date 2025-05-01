@@ -2,13 +2,9 @@
 
 [intro]
 
-## Supabase
-
 ## Hugging Face
 
 ## Translation
-
-## MCP
 
 ## Testing
 
