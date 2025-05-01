@@ -222,9 +222,10 @@ it("swaps languages when the swap button is clicked", async () => {
 });
 ```
 
-## 🧠 Other Considerations
+## 🧠 Other Considerations
 
-### MCP
+### MCP
+
 It would be nice in the future to better understand how MCP could be used within a small application like this.
 
 ### Supabase
