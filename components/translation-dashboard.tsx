@@ -34,18 +34,16 @@ const LANGUAGES = [
 export default function TranslationDashboard() {
   const { toast } = useToast();
 
-  const [sourceText, setSourceText] = useState("");
-  const [translatedText, setTranslatedText] = useState("");
-  const [sourceLang, setSourceLang] = useState("en");
-  const [targetLang, setTargetLang] = useState("ar");
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [sourceText, setSourceText] = useState<string>("");
+  const [translatedText, setTranslatedText] = useState<string>("");
+  const [sourceLang, setSourceLang] = useState<string>("en");
+  const [targetLang, setTargetLang] = useState<string>("ar");
+  const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
 
   const handleTranslate = async () => {
     if (!sourceText.trim()) return;
-
     setIsTranslating(true);
-
     try {
       const response = await fetch("/api/translate", {
         method: "POST",
@@ -58,13 +56,10 @@ export default function TranslationDashboard() {
           targetLang,
         }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.error || "Translation failed");
       }
-
       setTranslatedText(data.translatedText);
     } catch (error: any) {
       toast({
