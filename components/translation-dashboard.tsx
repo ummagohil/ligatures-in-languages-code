@@ -1,8 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSupabase } from "@/lib/supabase-provider";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,17 +12,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Copy,
-  Check,
-  RotateCcw,
-  LogOut,
-  History,
-  Settings,
-  Globe,
-} from "lucide-react";
-import type { User } from "@supabase/supabase-js";
-import { MCPStatus } from "./mcp-status";
+import { Copy, Check, RotateCcw, Globe } from "lucide-react";
 
 // Supported languages with ligatures
 const LANGUAGES = [
@@ -43,35 +31,19 @@ const LANGUAGES = [
   { code: "ru", name: "Russian" },
 ];
 
-interface TranslationDashboardProps {
-  user: User;
-  profile: any;
-}
-
-export default function TranslationDashboard({
-  user,
-  profile,
-}: TranslationDashboardProps) {
-  const router = useRouter();
-  const { supabase } = useSupabase();
+export default function TranslationDashboard() {
   const { toast } = useToast();
 
-  const [sourceText, setSourceText] = useState("");
-  const [translatedText, setTranslatedText] = useState("");
-  const [sourceLang, setSourceLang] = useState(
-    profile?.preferred_source_language || "en"
-  );
-  const [targetLang, setTargetLang] = useState(
-    profile?.preferred_target_language || "ar"
-  );
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [copied, setCopied] = useState(false);
+  const [sourceText, setSourceText] = useState<string>("");
+  const [translatedText, setTranslatedText] = useState<string>("");
+  const [sourceLang, setSourceLang] = useState<string>("en");
+  const [targetLang, setTargetLang] = useState<string>("ar");
+  const [isTranslating, setIsTranslating] = useState<boolean>(false);
+  const [copied, setCopied] = useState<boolean>(false);
 
   const handleTranslate = async () => {
     if (!sourceText.trim()) return;
-
     setIsTranslating(true);
-
     try {
       const response = await fetch("/api/translate", {
         method: "POST",
@@ -84,28 +56,11 @@ export default function TranslationDashboard({
           targetLang,
         }),
       });
-
       const data = await response.json();
-
       if (!response.ok) {
         throw new Error(data.error || "Translation failed");
       }
-
       setTranslatedText(data.translatedText);
-
-      // Update user preferences if they've changed
-      if (
-        sourceLang !== profile?.preferred_source_language ||
-        targetLang !== profile?.preferred_target_language
-      ) {
-        await supabase
-          .from("user_profiles")
-          .update({
-            preferred_source_language: sourceLang,
-            preferred_target_language: targetLang,
-          })
-          .eq("id", user.id);
-      }
     } catch (error: any) {
       toast({
         title: "Translation failed",
@@ -130,40 +85,20 @@ export default function TranslationDashboard({
     setTranslatedText(sourceText);
   };
 
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    router.push("/");
-    router.refresh();
-  };
-
   return (
     <div className="flex min-h-screen flex-col">
       <header className="sticky top-0 z-40 border-b bg-background">
-        <div className="container flex h-16 items-center justify-between py-4">
+        <div className="container flex h-16 items-center justify-center py-4">
           <div className="flex items-center gap-2">
             <Globe className="h-6 w-6" />
-            <span className="text-xl font-bold">Ligature Translator</span>
+            <span className="text-xl font-bold">Ligatures in Languages</span>
           </div>
-          <nav className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push("/history")}
-            >
-              <History className="h-5 w-5" />
-              <span className="sr-only">History</span>
-            </Button>
-            <Button variant="ghost" size="icon" onClick={handleSignOut}>
-              <LogOut className="h-5 w-5" />
-              <span className="sr-only">Sign out</span>
-            </Button>
-          </nav>
         </div>
       </header>
 
-      <main className="container flex-1 py-6 grid justify-center">
-        <Card>
-          <CardContent className="p-6">
+      <main className="container py-6 grid justify-center">
+        <Card className="max-h-[600px]">
+          <CardContent className="p-4">
             <div className="grid gap-6">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="grid gap-2">
@@ -203,23 +138,22 @@ export default function TranslationDashboard({
                   </Select>
                 </div>
               </div>
-
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="grid gap-2">
                   <Textarea
-                    placeholder="Enter text to translate"
-                    className="min-h-[200px] resize-none"
                     value={sourceText}
                     onChange={(e) => setSourceText(e.target.value)}
+                    placeholder="Enter text to translate"
+                    className="min-h-[200px] cursor-text"
                   />
                 </div>
                 <div className="grid gap-2">
                   <div className="relative">
                     <Textarea
-                      placeholder="Translation will appear here"
-                      className="min-h-[200px] resize-none"
                       value={translatedText}
                       readOnly
+                      placeholder="Translation will appear here"
+                      className="min-h-[200px] cursor-text"
                     />
                     {translatedText && (
                       <Button
@@ -239,21 +173,16 @@ export default function TranslationDashboard({
                   </div>
                 </div>
               </div>
-
               <Button
                 onClick={handleTranslate}
-                disabled={isTranslating || !sourceText.trim()}
-                className="w-full"
+                disabled={isTranslating}
+                className="w-full hover:cursor-pointer"
               >
                 {isTranslating ? "Translating..." : "Translate"}
               </Button>
             </div>
           </CardContent>
         </Card>
-
-        <div className="mt-6">
-          <MCPStatus />
-        </div>
       </main>
     </div>
   );

@@ -1,6 +1,6 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Globe, Languages, History, Star } from "lucide-react"
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Globe, Languages, Star } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -28,7 +28,8 @@ export default function LandingPage() {
               Translate Ligature Languages with AI
             </h1>
             <p className="max-w-[750px] text-lg text-muted-foreground sm:text-xl">
-              Powerful translation for complex scripts and ligature languages powered by Hugging Face NLP models
+              Powerful translation for complex scripts and ligature languages
+              powered by Hugging Face NLP models
             </p>
             <div className="flex flex-col gap-4 sm:flex-row">
               <Link href="/login">
@@ -51,22 +52,18 @@ export default function LandingPage() {
               </div>
               <h3 className="text-xl font-bold">Advanced Translation</h3>
               <p className="text-muted-foreground">
-                Support for complex scripts and ligature languages with state-of-the-art NLP models
+                Support for complex scripts and ligature languages with
+                state-of-the-art NLP models
               </p>
-            </div>
-            <div className="flex flex-col items-center gap-2 text-center">
-              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
-                <History className="h-6 w-6 text-primary" />
-              </div>
-              <h3 className="text-xl font-bold">Translation History</h3>
-              <p className="text-muted-foreground">Keep track of your translations and access them anytime</p>
             </div>
             <div className="flex flex-col items-center gap-2 text-center">
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
                 <Star className="h-6 w-6 text-primary" />
               </div>
               <h3 className="text-xl font-bold">Favorites</h3>
-              <p className="text-muted-foreground">Save your most important translations for quick access</p>
+              <p className="text-muted-foreground">
+                Save your most important translations for quick access
+              </p>
             </div>
           </div>
         </section>
@@ -79,5 +76,5 @@ export default function LandingPage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
